@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>Ministério da Excelência — IASD Ouro Preto</title>
+<script>
+window.onerror = function(msg, url, line, col, err){
+  try{
+    var div = document.createElement('div');
+    div.setAttribute('style','position:fixed;top:0;left:0;right:0;background:#b91c1c;color:#fff;padding:14px;font-family:sans-serif;font-size:14px;z-index:99999;line-height:1.4;');
+    div.innerHTML = '<b>Erro ao carregar o app</b><br>' + msg + ' (linha ' + line + ')<br><span style="font-size:12px;opacity:.85;">Tire um print desta mensagem e envie para quem criou o app.</span>';
+    if (document.body){ document.body.appendChild(div); }
+    else { window.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(div); }); }
+  }catch(e){}
+  return false;
+};
+window.addEventListener('unhandledrejection', function(ev){
+  try{
+    var motivo = (ev && ev.reason && ev.reason.message) ? ev.reason.message : String(ev && ev.reason);
+    window.onerror('Falha interna: ' + motivo, '', 0, 0, ev.reason);
+  }catch(e){}
+});
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=Sacramento&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root{
+    color-scheme: dark;
+    --navy-bg:#0b1330; --navy-card:#131c40; --navy-card-2:#182352;
+    --navy-line: rgba(227,166,62,0.18);
+    --gold:#e3a63e; --gold-soft:#f0c877; --cream:#f5efe0;
+    --slate:#98a1c4; --green:#3fa76b; --red:#d9614f; --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(ellipse at top, #101a42 0%, var(--navy-bg) 55%);
+    color:var(--cream); font-family:'Inter',sans-serif; font-size:17px; line-height:1.5;
+    -webkit-font-smoothing:antialiased; padding-bottom:60px;
+  }
+  .app{max-width:640px;margin:0 auto;padding:0 16px;}
+  h1,h2{font-family:'Playfair Display',serif;margin:0;}
+  button{font-family:'Inter',sans-serif;cursor:pointer;}
+  input,textarea,select{font-family:'Inter',sans-serif;}
+  :focus-visible{outline:3px solid var(--gold-soft);outline-offset:2px;}
+
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(11,19,48,0.97);backdrop-filter: blur(6px);
+    border-bottom:1px solid var(--navy-line);padding:10px 16px;display:flex;flex-direction:column;gap:8px;}
+  .topbar-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .status{font-size:15px;color:var(--slate);font-weight:600;}
+  .topbar.travado .status{color:var(--green);}
+  .topbar-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .btn{border:none;border-radius:12px;padding:11px 16px;font-size:15px;font-weight:700;
+    display:inline-flex;align-items:center;gap:6px;min-height:46px;
+    transition:transform .12s ease;}
+  .btn:active{transform:scale(0.97);}
+  a.btn{text-decoration:none;justify-content:center;}
+  .btn-lock{background:var(--gold);color:#241705;}
+  .topbar.travado .btn-lock{background:var(--navy-card-2);color:var(--cream);border:1px solid var(--gold);}
+  .btn-copy{background:var(--navy-card-2);color:var(--cream);border:1px solid var(--gold-soft);}
+  .btn-zap{background:var(--green);color:#08210f;}
+  .btn-ver{background:var(--navy-card-2);color:var(--gold-soft);border:1px solid var(--gold);}
+  .btn-neutro{background:var(--navy-card-2);color:var(--cream);border:1px solid var(--navy-line);}
+  .status-salvo{font-size:12px;color:var(--slate);}
+  .status-salvo.erro{color:var(--red);font-weight:600;font-size:13px;}
+  .status-salvo:empty{display:none;}
+  .hidden{display:none !important;}
+
+  .header{text-align:center;padding:28px 8px 12px;}
+  .header h1{font-size:30px;color:var(--cream);font-weight:800;letter-spacing:.3px;}
+  .header .igreja{font-size:14px;letter-spacing:2px;color:var(--gold-soft);text-transform:uppercase;font-weight:700;margin-top:6px;}
+  .divider{width:70px;height:2px;background:var(--gold);margin:14px auto;opacity:.6;}
+
+  .modo-seletor{display:flex;gap:10px;margin-bottom:16px;}
+  .modo-btn{flex:1;min-height:56px;border-radius:14px;border:2px solid var(--navy-line);background:var(--navy-card);
+    color:var(--slate);font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .modo-btn.ativo{background:var(--gold);border-color:var(--gold);color:#241705;}
+  .modo-btn:disabled{opacity:.5;}
+
+  .date-card{background:var(--navy-card);border:1px solid var(--navy-line);border-radius:var(--radius);
+    padding:16px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .date-card label{font-weight:700;font-size:16px;display:flex;align-items:center;gap:8px;}
+  .date-card input[type=date]{background:var(--navy-card-2);border:1px solid var(--navy-line);color:var(--cream);
+    border-radius:10px;padding:10px 12px;font-size:16px;min-height:44px;}
+  .weekday{font-family:'Sacramento',cursive;font-size:26px;color:var(--gold-soft);width:100%;text-align:right;}
+
+  .section{background:var(--navy-card);border:1px solid var(--navy-line);border-left:4px solid var(--gold);
+    border-radius:var(--radius);padding:16px 16px 14px;margin-bottom:14px;}
+  .section.destaque .title{letter-spacing:1.5px;color:var(--gold-soft);}
+  .section-head{display:flex;align-items:center;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+  .section-head .icon{font-size:22px;}
+  .section-head .title{font-weight:700;font-size:17px;flex:1;min-width:110px;}
+  .drag-handle{touch-action:none;cursor:grab;font-size:20px;color:var(--slate);padding:8px 6px;flex-shrink:0;user-select:none;}
+  .section.arrastando{opacity:0.9;box-shadow:0 12px 28px rgba(0,0,0,.45);background:var(--navy-card-2);}
+
+  .relogio{display:inline-flex;align-items:center;gap:2px;background:var(--navy-card-2);
+    border:1px solid var(--navy-line);border-radius:24px;padding:2px 6px 2px 4px;}
+  .relogio .time-input{background:transparent;border:none;color:var(--gold-soft);font-size:16px;font-weight:700;
+    padding:4px 4px;min-height:38px;width:auto;}
+  .relogio .time-input:disabled{opacity:1;color:var(--slate);}
+  .relogio-btn{background:transparent;border:none;color:var(--slate);padding:6px;min-width:38px;min-height:38px;
+    display:inline-flex;align-items:center;justify-content:center;border-radius:50%;}
+  .relogio-btn svg{display:block;}
+  .relogio-btn.oculto{color:var(--red);}
+  .relogio-btn.ativo{color:var(--gold);}
+
+  .ocultar-btn{background:transparent;border:1px solid var(--navy-line);color:var(--slate);font-size:15px;padding:6px 10px;border-radius:8px;}
+  .excluir-btn{background:transparent;border:1px solid rgba(217,97,79,0.4);color:var(--red);font-size:15px;padding:6px 10px;border-radius:8px;}
+  .fields{display:flex;flex-direction:column;gap:8px;}
+  .field-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .name-input, .obs-textarea, .label-input, .time-novo, .select-novo{background:var(--navy-card-2);border:1px solid var(--navy-line);color:var(--cream);
+    border-radius:10px;padding:12px 14px;font-size:16px;min-height:48px;}
+  .name-input{flex:1;width:100%;min-width:140px;}
+  .name-input::placeholder, .obs-textarea::placeholder, .label-input::placeholder{color:var(--slate);}
+  input:disabled, textarea:disabled{opacity:.6;}
+  .remove-btn{background:transparent;border:1px solid var(--red);color:var(--red);border-radius:10px;
+    width:44px;height:44px;font-size:16px;flex-shrink:0;}
+  .add-btn{margin-top:10px;background:transparent;border:1.5px dashed var(--gold-soft);color:var(--gold-soft);
+    border-radius:10px;padding:10px 14px;font-size:15px;font-weight:700;width:100%;min-height:44px;}
+  .subrole-fixas{display:flex;flex-direction:column;gap:8px;margin-bottom:8px;}
+  .subrole{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .subrole .subrole-label{font-size:14px;color:var(--slate);width:130px;flex-shrink:0;font-weight:600;}
+  .subrole .name-input{flex:1;min-width:120px;}
+  .label-input{width:130px;flex-shrink:0;color:var(--gold-soft);font-size:14px;}
+  .obs-textarea{min-height:80px;resize:vertical;width:100%;}
+  .hint{font-size:13px;color:var(--slate);margin-top:10px;}
+
+  .subgrupo{margin-bottom:16px;padding-left:12px;border-left:2px solid var(--navy-line);}
+  .subgrupo:last-child{margin-bottom:0;}
+  .subgrupo-titulo{font-size:14px;color:var(--gold-soft);font-weight:700;margin-bottom:6px;}
+  .subgrupo-marcador{font-size:15px;color:var(--cream);background:var(--navy-card-2);border:1px solid var(--navy-line);
+    border-radius:10px;padding:12px 14px;}
+  .campos-proprios{margin-bottom:14px;}
+
+  .midia-toggle{display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 12px;
+    background:var(--navy-card-2);border-radius:10px;cursor:pointer;font-size:15px;}
+  .midia-toggle input[type=checkbox]{width:22px;height:22px;accent-color:var(--gold);flex-shrink:0;}
+
+  .papeis-mini{display:flex;gap:4px;}
+  .papel-btn{width:42px;height:42px;border-radius:10px;border:1px solid var(--navy-line);
+    background:var(--navy-card-2);font-size:18px;flex-shrink:0;}
+  .papel-btn.ativo{background:var(--gold);border-color:var(--gold);}
+  .field-row-louvor .name-input{flex:1 1 140px;}
+
+  #sugestoesPopup{position:absolute;z-index:80;background:var(--navy-card-2);border:1px solid var(--gold-soft);
+    border-radius:10px;padding:6px;display:flex;flex-wrap:wrap;gap:6px;max-width:90vw;
+    box-shadow:0 8px 20px rgba(0,0,0,.35);}
+  .sugestao-chip{background:rgba(227,166,62,0.15);border:1px solid var(--gold);color:var(--gold-soft);
+    border-radius:20px;padding:7px 12px;font-size:14px;font-weight:600;}
+  .sugestao-chip:active{background:var(--gold);color:#241705;}
+
+  .add-momento-card{border-style:dashed;border-left:none;background:rgba(227,166,62,0.06);text-align:center;}
+  .add-momento-card .add-btn{font-size:16px;padding:14px 16px;}
+  #formNovoMomento{display:flex;flex-direction:column;gap:10px;margin-top:12px;text-align:left;}
+  .linha-novo{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:15px;}
+  .linha-novo label{color:var(--slate);font-weight:600;}
+  .form-novo-acoes{display:flex;gap:10px;}
+  .form-novo-acoes .btn{flex:1;justify-content:center;}
+  .ordenar-card{text-align:center;margin-bottom:14px;}
+  .ordenar-card .add-btn{color:var(--cream);border-color:var(--navy-line);margin-top:0;}
+
+  #excluidosContainer{margin:4px 0 14px;padding:12px 14px;background:var(--navy-card);
+    border:1px dashed var(--navy-line);border-radius:12px;}
+  .excluidos-titulo{font-size:13px;color:var(--slate);margin-bottom:8px;font-weight:700;}
+  .restaurar-chip{background:transparent;border:1px solid var(--gold-soft);color:var(--gold-soft);
+    border-radius:20px;padding:8px 14px;font-size:14px;margin:4px 6px 4px 0;}
+
+  .confirmar-box{margin-top:14px;background:var(--navy-card);border:1px solid var(--red);border-radius:12px;padding:16px;text-align:center;}
+  .confirmar-box p{margin:0 0 12px;font-size:15px;}
+  .confirmar-acoes{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  .confirmar-extra{margin-top:14px;padding-top:12px;border-top:1px solid var(--navy-line);}
+  .confirmar-extra p{font-size:13px;color:var(--slate);}
+
+  .preview-wrap{margin-top:26px;}
+  .preview-wrap h2{font-size:20px;color:var(--gold-soft);text-align:center;margin-bottom:14px;}
+  .preview-card{background:linear-gradient(180deg,#0d1638,#0a1230);border:2px solid var(--gold);
+    border-radius:20px;padding:26px 20px;animation:reveal .4s ease;}
+  @keyframes reveal{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .preview-title{font-family:'Playfair Display',serif;font-weight:800;font-size:22px;text-align:center;color:var(--cream);}
+  .preview-date{font-family:'Sacramento',cursive;font-size:30px;color:var(--gold);text-align:center;margin-bottom:16px;}
+  .preview-lista{columns:2;column-gap:24px;}
+  .preview-item{font-size:14.5px;padding:8px 0;border-bottom:1px solid var(--navy-line);break-inside:avoid;}
+  .preview-item b{color:var(--gold-soft);}
+  .preview-item-title{font-weight:600;}
+  .preview-item-title.destaque{letter-spacing:1px;color:var(--gold-soft);}
+  .preview-item-subs{margin-top:4px;margin-left:24px;}
+  .preview-item-sub{font-size:13px;color:var(--slate);padding:2px 0;}
+  .preview-obs{margin-top:16px;padding-top:12px;border-top:1px solid var(--navy-line);font-size:14px;color:var(--slate);}
+  @media (max-width:480px){ .preview-lista{columns:1;} }
+
+  .bottom-actions{margin-top:22px;}
+  #btnLimpar{background:transparent;border:1.5px solid var(--red);color:var(--red);width:100%;justify-content:center;}
+  #btnLimpar:disabled{opacity:.4;}
+
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);
+    background:var(--gold);color:#241705;font-weight:700;padding:12px 20px;border-radius:30px;
+    opacity:0;transition:opacity .25s ease, transform .25s ease;z-index:250;box-shadow:0 8px 20px rgba(0,0,0,.4);
+    max-width:90vw;text-align:center;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .overlay{position:fixed;inset:0;background:var(--navy-bg);z-index:220;overflow-y:auto;padding:16px;}
+  .overlay-header{display:flex;margin-bottom:14px;max-width:640px;margin-left:auto;margin-right:auto;}
+  .overlay-fechar{background:transparent;border:1px solid var(--gold-soft);color:var(--gold-soft);
+    border-radius:10px;padding:10px 16px;font-size:15px;font-weight:700;}
+  .overlay-inner{max-width:640px;margin:0 auto;}
+  .overlay-acoes{display:flex;flex-direction:column;gap:10px;margin-top:20px;}
+</style>
+</head>
+<body>
+
+<div id="sugestoesPopup" class="hidden"></div>
+<div id="toast"></div>
+
+<div class="topbar" id="topbar">
+  <div class="topbar-row">
+    <div class="status" id="statusText">✏️ Preenchendo o cronograma</div>
+    <div class="topbar-actions">
+      <button class="btn btn-lock" id="btnLock" onclick="alternarTravamento()">🔒 Travar tela</button>
+      <button class="btn btn-ver hidden" id="btnVer" onclick="abrirConferir()">👁️ Conferir tudo</button>
+    </div>
+  </div>
+  <div class="status-salvo" id="statusSalvo"></div>
+</div>
+
+<div class="app">
+  <div class="header">
+    <svg viewBox="0 0 100 100" width="66" height="66" style="display:block;margin:0 auto 8px;">
+      <circle cx="50" cy="50" r="47" fill="none" stroke="#e3a63e" stroke-width="2"/>
+      <circle cx="50" cy="50" r="39" fill="none" stroke="#e3a63e" stroke-width="1" opacity="0.5"/>
+      <path d="M50 32 L50 68 M32 40 Q50 32 68 40 M32 62 Q50 70 68 62" stroke="#f0c877" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      <path d="M50 20 L53 27 L60 27 L54 32 L56 39 L50 35 L44 39 L46 32 L40 27 L47 27 Z" fill="#e3a63e"/>
+    </svg>
+    <h1>Ministério da Excelência</h1>
+    <div class="igreja">IASD Ouro Preto</div>
+    <div class="divider"></div>
+  </div>
+
+  <div class="modo-seletor" role="group" aria-label="Tipo de culto">
+    <button type="button" class="modo-btn" id="modoSabado" aria-pressed="false" onclick="trocarModo('sabado')">📖 Sábado</button>
+    <button type="button" class="modo-btn" id="modoDomingo" aria-pressed="false" onclick="trocarModo('domingo')">🕊️ Domingo</button>
+  </div>
+
+  <div class="date-card">
+    <label for="inputData">📅 Data do culto</label>
+    <input type="date" id="inputData" onchange="atualizarPreview(); salvarEstadoAdiado();">
+    <div class="weekday" id="weekdayLabel"></div>
+  </div>
+
+  <form id="formCronograma" onsubmit="return false;">
+    <div class="section ordenar-card">
+      <button type="button" class="add-btn" onclick="ordenarPorHorarioManual()">🕐 Ordenar momentos por horário</button>
+      <div class="hint">A ordem se ajusta sozinha quando você muda um horário. Momentos sem relógio acompanham o momento anterior.</div>
+    </div>
+
+    <div id="momentosContainer"></div>
+
+    <div class="section add-momento-card">
+      <button type="button" class="add-btn" id="btnMostrarFormNovo" onclick="mostrarFormNovoMomento()">+ Adicionar momento</button>
+      <div id="formNovoMomento" class="hidden">
+        <input type="text" id="novoMomentoTitulo" class="name-input" placeholder="Nome do momento (ex: Libras, Excelência...)">
+        <label class="midia-toggle"><input type="checkbox" id="novoMomentoHora" checked onchange="aoMarcarHoraNovo()"><span>🕐 Tem horário certo (desmarque se for só sequência do culto)</span></label>
+        <div class="linha-novo" id="linhaNovoHora">
+          <label for="novoMomentoHoraValor">Horário:</label>
+          <input type="time" id="novoMomentoHoraValor" class="time-novo" value="09:00">
+        </div>
+        <div class="linha-novo hidden" id="linhaNovoPosicao">
+          <label for="novoMomentoApos">Colocar depois de:</label>
+          <select id="novoMomentoApos" class="select-novo"></select>
+        </div>
+        <label class="midia-toggle"><input type="checkbox" id="novoMomentoNome" checked><span>👤 Tem espaço para nome de pessoa</span></label>
+        <label class="midia-toggle"><input type="checkbox" id="novoMomentoMidia"><span>📺 Terá opção de mídia no telão?</span></label>
+        <div class="form-novo-acoes">
+          <button type="button" class="btn btn-zap" onclick="confirmarNovoMomento()">✓ Adicionar</button>
+          <button type="button" class="btn btn-neutro" onclick="cancelarNovoMomento()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="excluidosContainer" class="hidden"></div>
+
+    <div class="section">
+      <div class="section-head"><span class="icon">📝</span><span class="title">Observações</span></div>
+      <textarea id="inputObservacoes" class="obs-textarea" placeholder="Alguma informação extra sobre o culto de hoje..."
+        oninput="atualizarPreview()" onchange="salvarEstadoAdiado()"></textarea>
+    </div>
+  </form>
+
+  <div class="preview-wrap">
+    <h2>Prévia do cronograma</h2>
+    <div class="preview-card" id="previewCard"></div>
+  </div>
+
+  <div class="bottom-actions">
+    <button class="btn" id="btnLimpar" onclick="pedirConfirmacaoLimpar()">🧹 Limpar tudo</button>
+    <div id="confirmarLimparBox" class="hidden confirmar-box">
+      <p>Deseja limpar os nomes preenchidos? Os momentos e os horários continuam como estão. Nada é apagado sozinho: só quando você confirma aqui.</p>
+      <div class="confirmar-acoes">
+        <button class="btn" style="background:var(--red);color:#fff;" onclick="limparTudoConfirmado()">Sim, limpar os nomes</button>
+        <button class="btn btn-neutro" onclick="cancelarLimpar()">Cancelar</button>
+      </div>
+      <div class="confirmar-extra">
+        <p>Quer voltar ao modelo original deste culto? Isso desfaz momentos adicionados, ocultos e horários alterados.</p>
+        <button class="btn btn-neutro" onclick="restaurarModeloPadrao()">↩️ Restaurar modelo padrão</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="overlayConferir" class="overlay hidden">
+  <div class="overlay-header"><button type="button" class="overlay-fechar" onclick="fecharConferir()">← Voltar e editar</button></div>
+  <div class="overlay-inner">
+    <div class="preview-card" id="overlayPreviewCard"></div>
+    <div class="overlay-acoes">
+      <a class="btn btn-copy" href="#" onclick="copiarTexto(); return false;">📋 Copiar texto</a>
+      <a class="btn btn-zap" id="btnCompartilharImagem" href="#" onclick="compartilharOuBaixarImagem(); return false;">📸 Baixar imagem</a>
+    </div>
+  </div>
+</div>
+
+<script>
+let travado = false;
+let freqPessoas = {};
+let freqMusicas = {};
+let sugestaoAtiva = null;
+let salvarTimeout = null;
+let momentos = [];
+let excluidos = [];
+let arrastando = null;
+let modo = 'sabado';
+let estados = {};
+let carregado = false;
+let leituraRemotaIncerta = false;
+
+const CHAVE_ARMAZENAMENTO = 'ministerio-excelencia-v2';
+const CHAVE_ANTIGA = 'ministerio-excelencia-dados';
+
+/* ---------- Ícones (SVG) ---------- */
+const SVG_ABRE = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+const ICONE_OLHO = SVG_ABRE + '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+const ICONE_OLHO_RISCADO = SVG_ABRE + '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+const ICONE_CADEADO = SVG_ABRE + '<rect x="3" y="11" width="18" height="11" rx="2" ry="2" fill="currentColor" fill-opacity="0.25"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+const ICONE_CADEADO_ABERTO = SVG_ABRE + '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>';
+
+function esc(s){
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ---------- Catálogo e modelos (Sábado / Domingo) ---------- */
+const CATALOGO = {
+  'recepcao':   {id:'recepcao', titulo:'Recepção', icone:'🚪', tipo:'pessoas', min:2},
+  'diaconos':   {id:'diaconos', titulo:'Diáconos', icone:'🤝', tipo:'diaconos'},
+  'som':        {id:'som', titulo:'Som e mídia', icone:'🎚️', tipo:'sommidia'},
+  'fotografia': {id:'fotografia', titulo:'Fotografia', icone:'📷', tipo:'pessoas', min:1},
+  'louvor':     {id:'louvor', titulo:'Equipe de louvor', icone:'🎤', tipo:'louvor', min:6},
+  'escolasabatina': {id:'escolasabatina', titulo:'ESCOLA SABATINA', icone:'📚', tipo:'estruturado', destaque:true, subgrupos:[
+      {id:'boasvindas', label:'Boas-vindas', tipo:'pessoas', min:1},
+      {id:'louvorcong', label:'Louvor com a congregação', tipo:'musicas', min:1},
+      {id:'oracaojoelhos', label:'Oração de joelhos', tipo:'pessoas', min:1},
+      {id:'musica', label:'Música especial', tipo:'pessoas', min:1}
+  ]},
+  'informativo':{id:'informativo', titulo:'Informativo', icone:'📰', tipo:'pessoas', min:1},
+  'confraternizacao': {id:'confraternizacao', titulo:'Confraternização entre Classes/Lição', icone:'🤗', tipo:'pessoas', min:1, autoDe:{momento:'informativo'}},
+  'vinheta':    {id:'vinheta', titulo:'Vinheta (cronômetro)', icone:'⏱️', tipo:'pessoas', temMidia:true, temNome:false},
+  'anuncios':   {id:'anuncios', titulo:'Anúncios', icone:'📢', tipo:'pessoas', temMidia:true, min:1},
+  'inclusao':   {id:'inclusao', titulo:'Inclusão', icone:'♿', tipo:'pessoas', temMidia:true, temSomenteVideo:true, min:1},
+  'louvor-detalhe': {id:'louvor-detalhe', titulo:'Louvor', icone:'🎼', tipo:'estruturado', subgrupos:[
+      {id:'ministro', label:'Ministro de Louvor', tipo:'pessoas', min:1, autoDe:{papelLouvor:'ministro'}},
+      {id:'musicas', label:'Músicas', tipo:'musicas', min:3},
+      {id:'oracao', label:'Oração', tipo:'pessoas', min:1, autoDe:{papelLouvor:'oracao'}}
+  ]},
+  'ofertorio':  {id:'ofertorio', titulo:'Ofertório', icone:'💰', tipo:'estruturado', min:1, temMidia:true, subgrupos:[
+      {id:'recolhimento', label:'Recolhimento dos dízimos e ofertas', tipo:'marcador'},
+      {id:'oracao', label:'Oração', tipo:'pessoas', min:1, autoDe:{momento:'ofertorio'}}
+  ]},
+  'criancas':   {id:'criancas', titulo:'Adoração Infantil', icone:'🧸', tipo:'pessoas', temMidia:true, min:1},
+  'jardim':     {id:'jardim', titulo:'Jardim de oração', icone:'🌿', tipo:'pessoas', temMidia:true, min:1},
+  'musica-pos-jardim': {id:'musica-pos-jardim', titulo:'Música especial', icone:'🎵', tipo:'pessoas', min:1},
+  'musica1':    {id:'musica1', titulo:'Música especial', icone:'🎵', tipo:'pessoas', min:1},
+  'mensagem':   {id:'mensagem', titulo:'Mensagem', icone:'📖', tipo:'pessoas', temMidia:true, min:1},
+  'musica2':    {id:'musica2', titulo:'Música especial', icone:'🎵', tipo:'pessoas', min:1},
+  'oracaofinal':{id:'oracaofinal', titulo:'Oração final', icone:'🙏', tipo:'pessoas', min:1}
+};
+function momentoDoCatalogo(id, hora){
+  const m = JSON.parse(JSON.stringify(CATALOGO[id]));
+  m.temHora = !!hora;
+  if (hora) m.hora = hora;
+  m.horaFixa = false;
+  m.horaOculta = false;
+  return m;
+}
+function modeloPadrao(md){
+  const c = momentoDoCatalogo;
+  if (md === 'domingo'){
+    return [
+      c('recepcao','18:30'), c('diaconos','18:30'), c('som','18:30'), c('fotografia'),
+      c('louvor','19:00'), c('louvor-detalhe','19:00'),
+      c('musica1','19:10'), c('mensagem','19:15'), c('musica2','19:50'), c('oracaofinal','19:55')
+    ];
+  }
+  return [
+    c('recepcao','08:30'), c('diaconos','08:30'), c('som','08:30'), c('fotografia'),
+    c('louvor','08:45'),
+    c('escolasabatina','09:00'),
+    c('informativo','09:15'), c('confraternizacao','09:20'),
+    c('anuncios','09:50'), c('vinheta','09:55'),
+    c('inclusao','10:05'), c('louvor-detalhe','10:15'),
+    c('ofertorio','10:30'), c('criancas','10:40'), c('jardim','10:50'),
+    c('musica-pos-jardim','11:00'), c('musica1','11:05'), c('mensagem','11:10'),
+    c('musica2','11:45'), c('oracaofinal','11:50')
+  ];
+}
+
+/* ---------- Datas ---------- */
+function dataParaTexto(d){
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function dataDeHoje(){ return dataParaTexto(new Date()); }
+function diasAteDiaDaSemana(alvo){
+  return (alvo - new Date().getDay() + 7) % 7;
+}
+function proximaData(md){
+  const alvo = md === 'domingo' ? 0 : 6;
+  const d = new Date();
+  d.setDate(d.getDate() + diasAteDiaDaSemana(alvo));
+  return dataParaTexto(d);
+}
+function modoMaisProximo(){
+  return diasAteDiaDaSemana(0) < diasAteDiaDaSemana(6) ? 'domingo' : 'sabado';
+}
+function dataValida(dataStr, md){
+  if (!dataStr || dataStr < dataDeHoje()) return proximaData(md);
+  return dataStr;
+}
+function diaEDataFormatada(dataStr){
+  const dias = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+  const d = new Date(dataStr + 'T00:00:00');
+  if (isNaN(d.getTime())) return {diaSemana:'', dataFormatada:''};
+  return { diaSemana: dias[d.getDay()], dataFormatada: `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}` };
+}
+
+/* ---------- Linhas de campo ---------- */
+function criarLinhaCampo(container, tipo, placeholder, removivel, valor){
+  valor = valor || '';
+  const row = document.createElement('div');
+  row.className = 'field-row';
+  row.innerHTML = `
+    <input type="text" class="name-input" placeholder="${esc(placeholder)}" value="${esc(valor)}"
+      oninput="atualizarPreview()"
+      onfocus="mostrarSugestoes(this,'${tipo}')"
+      onchange="atualizarFrequencia(this,'${tipo}'); salvarEstadoAdiado();">
+    ${removivel ? `<button type="button" class="remove-btn" aria-label="Remover" onclick="this.closest('.field-row').remove(); atualizarPreview(); salvarEstadoAdiado();">✕</button>` : ''}
+  `;
+  container.appendChild(row);
+}
+function criarLinhaLouvor(container, removivel, valor, papeisAtivos){
+  valor = valor || ''; papeisAtivos = papeisAtivos || [];
+  const row = document.createElement('div');
+  row.className = 'field-row field-row-louvor';
+  row.innerHTML = `
+    <input type="text" class="name-input" placeholder="Nome da pessoa" value="${esc(valor)}"
+      oninput="atualizarPreview()"
+      onfocus="mostrarSugestoes(this,'pessoas')"
+      onchange="atualizarFrequencia(this,'pessoas'); salvarEstadoAdiado();">
+    <div class="papeis-mini">
+      <button type="button" class="papel-btn ${papeisAtivos.includes('ministro')?'ativo':''}" data-papel="ministro" title="Ministro de louvor" aria-label="Ministro de louvor" onclick="alternarPapelLouvor(this,'ministro')">🎤</button>
+      <button type="button" class="papel-btn ${papeisAtivos.includes('oracao')?'ativo':''}" data-papel="oracao" title="Oração" aria-label="Oração" onclick="alternarPapelLouvor(this,'oracao')">🙏</button>
+    </div>
+    ${removivel ? `<button type="button" class="remove-btn" aria-label="Remover" onclick="this.closest('.field-row').remove(); atualizarPreview(); salvarEstadoAdiado();">✕</button>` : ''}
+  `;
+  container.appendChild(row);
+}
+function adicionarFuncaoDiacono(label, valor){
+  const container = document.getElementById('camposDiaconosExtra');
+  if (!container) return;
+  const row = document.createElement('div');
+  row.className = 'field-row subrole-extra';
+  row.innerHTML = `
+    <input type="text" class="label-input" placeholder="Função" value="${esc(label)}" onchange="salvarEstadoAdiado()">
+    <input type="text" class="name-input" placeholder="Nome da pessoa" value="${esc(valor)}"
+      oninput="atualizarPreview()" onfocus="mostrarSugestoes(this,'pessoas')"
+      onchange="atualizarFrequencia(this,'pessoas'); salvarEstadoAdiado();">
+    <button type="button" class="remove-btn" aria-label="Remover" onclick="this.closest('.field-row').remove(); atualizarPreview(); salvarEstadoAdiado();">✕</button>
+  `;
+  container.appendChild(row);
+}
+function alternarPapelLouvor(btn, papel){
+  if (travado) return;
+  const ativo = btn.classList.contains('ativo');
+  document.querySelectorAll(`.papel-btn[data-papel="${papel}"]`).forEach(b => b.classList.remove('ativo'));
+  if (!ativo) btn.classList.add('ativo');
+  atualizarPreview();
+  salvarEstadoAdiado();
+}
+function nomePapelLouvor(papel){
+  const container = document.getElementById('camposLouvor');
+  if (!container) return null;
+  let nome = null;
+  container.querySelectorAll('.field-row').forEach(row => {
+    const n = row.querySelector('.name-input').value.trim();
+    if (!n) return;
+    row.querySelectorAll('.papel-btn.ativo').forEach(b => { if (b.dataset.papel === papel) nome = n; });
+  });
+  return nome;
+}
+
+/* ---------- Relógio: mostrar/ocultar (olho) e fixar (cadeado) ---------- */
+function lerHora(m){
+  const el = document.getElementById('hora-'+m.id);
+  return el ? el.value : (m.hora || '');
+}
+function textoHora(m){
+  if (!m.temHora || m.horaOculta) return '';
+  const h = lerHora(m);
+  return h ? h + ' ' : '';
+}
+function atualizarBotoesRelogio(m){
+  const olho = document.getElementById('olho-'+m.id);
+  const fixar = document.getElementById('fixar-'+m.id);
+  const input = document.getElementById('hora-'+m.id);
+  if (olho){
+    olho.innerHTML = m.horaOculta ? ICONE_OLHO_RISCADO : ICONE_OLHO;
+    olho.classList.toggle('oculto', !!m.horaOculta);
+    const t = m.horaOculta ? 'Horário oculto na prévia. Toque para mostrar' : 'Horário aparece na prévia. Toque para ocultar';
+    olho.title = t; olho.setAttribute('aria-label', t);
+  }
+  if (fixar){
+    fixar.innerHTML = m.horaFixa ? ICONE_CADEADO : ICONE_CADEADO_ABERTO;
+    fixar.classList.toggle('ativo', !!m.horaFixa);
+    const t = m.horaFixa ? 'Horário fixado. Toque para liberar a edição' : 'Toque para fixar o horário (evita mexer sem querer)';
+    fixar.title = t; fixar.setAttribute('aria-label', t);
+  }
+  if (input) input.disabled = !!m.horaFixa || travado;
+}
+function alternarMostrarHora(id){
+  const m = momentos.find(x => x.id === id);
+  if (!m) return;
+  m.horaOculta = !m.horaOculta;
+  atualizarBotoesRelogio(m);
+  atualizarPreview();
+  salvarEstadoAdiado();
+  mostrarToast(m.horaOculta ? 'Horário oculto na prévia' : 'Horário aparece na prévia');
+}
+function alternarFixarHora(id){
+  const m = momentos.find(x => x.id === id);
+  if (!m) return;
+  m.horaFixa = !m.horaFixa;
+  atualizarBotoesRelogio(m);
+  salvarEstadoAdiado();
+  mostrarToast(m.horaFixa ? 'Horário fixado' : 'Horário liberado para edição');
+}
+function aoMudarHora(id){
+  const m = momentos.find(x => x.id === id);
+  if (!m) return;
+  m.hora = lerHora(m);
+  if (ordenarMomentosPorHorario()){
+    reconstruirTela();
+    mostrarToast('Ordem atualizada pelo horário');
+  } else {
+    atualizarPreview();
+  }
+  salvarEstadoAdiado();
+}
+/* Ordena por horário. Momentos sem relógio acompanham o momento anterior. */
+function ordenarMomentosPorHorario(){
+  const grupos = [];
+  let atual = {chave:'', itens:[], pos:0};
+  grupos.push(atual);
+  momentos.forEach((m, i) => {
+    const h = m.temHora ? lerHora(m) : '';
+    if (h){ atual = {chave:h, itens:[m], pos:i}; grupos.push(atual); }
+    else atual.itens.push(m);
+  });
+  grupos.sort((a,b) => a.chave === b.chave ? a.pos - b.pos : (a.chave < b.chave ? -1 : 1));
+  const novo = [];
+  grupos.forEach(g => g.itens.forEach(m => novo.push(m)));
+  const mudou = novo.some((m,i) => m !== momentos[i]);
+  if (mudou) momentos = novo;
+  return mudou;
+}
+function ordenarPorHorarioManual(){
+  if (ordenarMomentosPorHorario()){
+    reconstruirTela();
+    salvarEstadoAdiado();
+    mostrarToast('Momentos ordenados por horário!');
+  } else {
+    mostrarToast('Já está na ordem dos horários.');
+  }
+}
+function reconstruirTela(){
+  const valores = coletarValores();
+  renderizarMomentos();
+  aplicarValores(valores);
+  aplicarEstadoTravamento();
+}
+
+/* ---------- Blocos de cada tipo de momento ---------- */
+function criarCabecalho(m){
+  const head = document.createElement('div');
+  head.className = 'section-head';
+  const relogio = m.temHora ? `
+    <div class="relogio" id="relogio-${m.id}">
+      <input type="time" class="time-input" id="hora-${m.id}" value="${esc(m.hora || '')}" onchange="aoMudarHora('${m.id}')">
+      <button type="button" class="relogio-btn" id="olho-${m.id}" onclick="alternarMostrarHora('${m.id}')"></button>
+      <button type="button" class="relogio-btn" id="fixar-${m.id}" onclick="alternarFixarHora('${m.id}')"></button>
+    </div>` : '';
+  head.innerHTML = `
+    <span class="drag-handle" aria-label="Arrastar para reordenar" title="Arrastar para reordenar">⠿</span>
+    <span class="icon">${m.icone}</span><span class="title">${esc(m.titulo)}</span>
+    ${relogio}
+    <button type="button" class="ocultar-btn" title="Ocultar este momento (dá pra trazer de volta)" aria-label="Ocultar este momento" onclick="ocultarMomento('${m.id}')">🙈</button>
+    <button type="button" class="excluir-btn" title="Excluir este momento definitivamente" aria-label="Excluir este momento definitivamente" onclick="pedirExclusaoDefinitiva('${m.id}')">🗑️</button>
+  `;
+  return head;
+}
+function criarMidiaToggle(id){
+  const label = document.createElement('label');
+  label.className = 'midia-toggle';
+  label.innerHTML = `<input type="checkbox" id="midia-${id}" onchange="atualizarPreview(); salvarEstadoAdiado();"><span>📺 Terá mídia no telão?</span>`;
+  return label;
+}
+function criarSomenteVideoToggle(id){
+  const label = document.createElement('label');
+  label.className = 'midia-toggle';
+  label.innerHTML = `<input type="checkbox" id="somentevideo-${id}" onchange="alternarSomenteVideo('${id}'); atualizarPreview(); salvarEstadoAdiado();"><span>🎬 Somente o vídeo (sem fala)</span>`;
+  return label;
+}
+function alternarSomenteVideo(id){
+  const chk = document.getElementById('somentevideo-'+id);
+  const container = document.getElementById('campos-'+id);
+  const addBtn = document.getElementById('addbtn-'+id);
+  if (!chk || !container) return;
+  const desabilitar = chk.checked;
+  container.querySelectorAll('.name-input').forEach(inp => {
+    if (desabilitar) inp.value = '';
+    inp.disabled = desabilitar || travado;
+  });
+  container.querySelectorAll('.remove-btn').forEach(b => { b.style.display = (desabilitar || travado) ? 'none' : ''; });
+  if (addBtn) addBtn.style.display = (desabilitar || travado) ? 'none' : '';
+}
+function criarBlocoDiaconos(){
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `
+    <div class="subrole-fixas">
+      <div class="subrole"><span class="subrole-label">Abrir a igreja</span>
+        <input type="text" class="name-input" id="diaconoAbrir" placeholder="Nome da pessoa"
+          oninput="atualizarPreview()" onfocus="mostrarSugestoes(this,'pessoas')"
+          onchange="atualizarFrequencia(this,'pessoas'); salvarEstadoAdiado();"></div>
+      <div class="subrole"><span class="subrole-label">Fechar a igreja</span>
+        <input type="text" class="name-input" id="diaconoFechar" placeholder="Nome da pessoa"
+          oninput="atualizarPreview()" onfocus="mostrarSugestoes(this,'pessoas')"
+          onchange="atualizarFrequencia(this,'pessoas'); salvarEstadoAdiado();"></div>
+      <div class="subrole"><span class="subrole-label">Corredor/Elevador</span>
+        <input type="text" class="name-input" id="diaconoCorredor" placeholder="Nome da pessoa"
+          oninput="atualizarPreview()" onfocus="mostrarSugestoes(this,'pessoas')"
+          onchange="atualizarFrequencia(this,'pessoas'); salvarEstadoAdiado();"></div>
+    </div>
+    <div class="fields" id="camposDiaconosExtra"></div>
+    <button type="button" class="add-btn" onclick="adicionarFuncaoDiacono(); salvarEstadoAdiado();">+ Adicionar outra função</button>
+  `;
+  return wrap;
+}
+function criarBlocoSomMidia(){
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `
+    <div class="subrole-fixas">
+      <div class="subrole"><span class="subrole-label">Mesa</span>
+        <input type="text" class="name-input" id="inputSomMesa" placeholder="Nome da pessoa"
+          oninput="atualizarPreview()" onfocus="mostrarSugestoes(this,'pessoas')"
+          onchange="atualizarFrequencia(this,'pessoas'); salvarEstadoAdiado();"></div>
+      <div class="subrole"><span class="subrole-label">Telão</span>
+        <input type="text" class="name-input" id="inputSomTelao" placeholder="Nome da pessoa"
+          oninput="atualizarPreview()" onfocus="mostrarSugestoes(this,'pessoas')"
+          onchange="atualizarFrequencia(this,'pessoas'); salvarEstadoAdiado();"></div>
+    </div>
+  `;
+  return wrap;
+}
+function criarBlocoLouvor(min){
+  const wrap = document.createElement('div');
+  const camposDiv = document.createElement('div');
+  camposDiv.className = 'fields'; camposDiv.id = 'camposLouvor';
+  wrap.appendChild(camposDiv);
+  for (let i=0;i<min;i++) criarLinhaLouvor(camposDiv, false, '', []);
+  const addBtn = document.createElement('button');
+  addBtn.type='button'; addBtn.className='add-btn'; addBtn.textContent='+ Adicionar pessoa';
+  addBtn.onclick = () => { criarLinhaLouvor(camposDiv, true, '', []); salvarEstadoAdiado(); };
+  wrap.appendChild(addBtn);
+  const hint = document.createElement('div');
+  hint.className = 'hint';
+  hint.textContent = 'Toque em 🎤 ou 🙏 ao lado do nome para marcar quem será o Ministro de Louvor e quem fará a oração. Os nomes marcados aparecem sozinhos no momento "Louvor".';
+  wrap.appendChild(hint);
+  return wrap;
+}
+function marcarDestinoAuto(container){
+  const inp = container.querySelector('.name-input');
+  if (inp) inp.dataset.autodest = '1';
+}
+function criarCamposProprios(m, tipo){
+  const camposDiv = document.createElement('div');
+  camposDiv.className = 'fields'; camposDiv.id = 'campos-'+m.id;
+  const placeholder = tipo==='musicas' ? 'Nome da música' : 'Nome da pessoa';
+  for (let i=0;i<m.min;i++) criarLinhaCampo(camposDiv, tipo, placeholder, false, '');
+  if (m.autoDe) marcarDestinoAuto(camposDiv);
+  return camposDiv;
+}
+function criarBotaoAdicionar(m, camposDiv, tipo){
+  const placeholder = tipo==='musicas' ? 'Nome da música' : 'Nome da pessoa';
+  const addBtn = document.createElement('button');
+  addBtn.type='button'; addBtn.className='add-btn'; addBtn.id = 'addbtn-'+m.id;
+  addBtn.textContent = tipo==='musicas' ? '+ Adicionar música' : '+ Adicionar pessoa';
+  addBtn.onclick = () => { criarLinhaCampo(camposDiv, tipo, placeholder, true, ''); salvarEstadoAdiado(); };
+  return addBtn;
+}
+function criarBlocoEstruturado(m){
+  const wrap = document.createElement('div');
+  (m.subgrupos||[]).forEach(sg => {
+    const grupoDiv = document.createElement('div');
+    grupoDiv.className = 'subgrupo';
+    if (sg.tipo === 'marcador'){
+      const linha = document.createElement('div');
+      linha.className = 'subgrupo-marcador';
+      linha.textContent = '✓ ' + sg.label;
+      grupoDiv.appendChild(linha);
+    } else {
+      const titulo = document.createElement('div');
+      titulo.className = 'subgrupo-titulo';
+      titulo.textContent = sg.label;
+      grupoDiv.appendChild(titulo);
+      const camposDiv = document.createElement('div');
+      camposDiv.className = 'fields'; camposDiv.id = `sg-${m.id}-${sg.id}`;
+      const placeholder = sg.tipo==='musicas' ? 'Nome da música' : 'Nome da pessoa';
+      for (let i=0;i<sg.min;i++) criarLinhaCampo(camposDiv, sg.tipo, placeholder, false, '');
+      if (sg.autoDe) marcarDestinoAuto(camposDiv);
+      grupoDiv.appendChild(camposDiv);
+      const addBtn = document.createElement('button');
+      addBtn.type='button'; addBtn.className='add-btn';
+      addBtn.textContent = sg.tipo==='musicas' ? '+ Adicionar música' : '+ Adicionar pessoa';
+      addBtn.onclick = () => { criarLinhaCampo(camposDiv, sg.tipo, placeholder, true, ''); salvarEstadoAdiado(); };
+      grupoDiv.appendChild(addBtn);
+    }
+    wrap.appendChild(grupoDiv);
+  });
+  return wrap;
+}
+function criarSecaoDOM(m){
+  const sec = document.createElement('div');
+  sec.className = 'section' + (m.destaque ? ' destaque' : '');
+  sec.dataset.id = m.id;
+  const head = criarCabecalho(m);
+  sec.appendChild(head);
+  configurarArraste(head.querySelector('.drag-handle'), sec);
+  if (m.tipo === 'pessoas' || m.tipo === 'musicas'){
+    if (m.temNome === false){
+      if (m.temMidia) sec.appendChild(criarMidiaToggle(m.id));
+    } else {
+      const camposDiv = criarCamposProprios(m, m.tipo);
+      sec.appendChild(camposDiv);
+      if (m.temMidia) sec.appendChild(criarMidiaToggle(m.id));
+      if (m.temSomenteVideo) sec.appendChild(criarSomenteVideoToggle(m.id));
+      sec.appendChild(criarBotaoAdicionar(m, camposDiv, m.tipo));
+    }
+  } else if (m.tipo === 'diaconos'){
+    sec.appendChild(criarBlocoDiaconos());
+  } else if (m.tipo === 'sommidia'){
+    sec.appendChild(criarBlocoSomMidia());
+  } else if (m.tipo === 'louvor'){
+    sec.appendChild(criarBlocoLouvor(m.min));
+  } else if (m.tipo === 'estruturado'){
+    if (m.min){
+      const proprios = document.createElement('div');
+      proprios.className = 'campos-proprios';
+      const camposDiv = criarCamposProprios(m, 'pessoas');
+      proprios.appendChild(camposDiv);
+      proprios.appendChild(criarBotaoAdicionar(m, camposDiv, 'pessoas'));
+      sec.appendChild(proprios);
+    }
+    sec.appendChild(criarBlocoEstruturado(m));
+    if (m.temMidia) sec.appendChild(criarMidiaToggle(m.id));
+  }
+  if (m.temHora) atualizarBotoesRelogio(m);
+  return sec;
+}
+function renderizarMomentos(){
+  const cont = document.getElementById('momentosContainer');
+  cont.innerHTML = '';
+  momentos.forEach(m => cont.appendChild(criarSecaoDOM(m)));
+  renderizarExcluidos();
+}
+function renderizarExcluidos(){
+  const cont = document.getElementById('excluidosContainer');
+  if (travado || excluidos.length === 0){ cont.innerHTML=''; cont.classList.add('hidden'); return; }
+  cont.classList.remove('hidden');
+  cont.innerHTML = '<div class="excluidos-titulo">Momentos ocultos (toque para trazer de volta):</div>' +
+    excluidos.map(m => `<button type="button" class="restaurar-chip" onclick="restaurarMomento('${m.id}')">↩️ ${esc(m.titulo)}</button>`).join('');
+}
+
+/* ---------- Preenchimento automático (copia o nome, mas permite alterar) ---------- */
+function valorOrigemAuto(auto){
+  if (auto.papelLouvor) return nomePapelLouvor(auto.papelLouvor) || '';
+  if (auto.momento){
+    const c = document.getElementById('campos-'+auto.momento);
+    if (!c) return null;
+    const inp = c.querySelector('.name-input');
+    return inp ? inp.value.trim() : '';
+  }
+  return null;
+}
+function aplicarAuto(destino, auto){
+  if (!destino || destino.dataset.manual) return;
+  const origem = valorOrigemAuto(auto);
+  if (origem === null) return;
+  const atual = destino.value.trim();
+  const ultimoAuto = destino.dataset.auto;
+  const podeSubstituir = atual === '' || (ultimoAuto !== undefined && atual === ultimoAuto) || (ultimoAuto === undefined && atual === origem);
+  if (!podeSubstituir) return;
+  if (destino.value !== origem) destino.value = origem;
+  destino.dataset.auto = origem;
+}
+function sincronizarAutoPreenchimento(){
+  momentos.forEach(m => {
+    if (m.autoDe) aplicarAuto(document.querySelector(`#campos-${m.id} .name-input`), m.autoDe);
+    (m.subgrupos||[]).forEach(sg => {
+      if (sg.autoDe) aplicarAuto(document.querySelector(`#sg-${m.id}-${sg.id} .name-input`), sg.autoDe);
+    });
+  });
+}
+document.addEventListener('input', (e) => {
+  const el = e.target;
+  if (el && el.dataset && el.dataset.autodest){
+    if (el.value !== (el.dataset.auto || '')) el.dataset.manual = '1';
+    else delete el.dataset.manual;
+  }
+}, true);
+
+/* ---------- Arrastar para reordenar ---------- */
+function configurarArraste(handle, secaoEl){
+  if (!handle) return;
+  handle.addEventListener('pointerdown', (e) => {
+    if (travado) return;
+    e.preventDefault();
+    const rect = secaoEl.getBoundingClientRect();
+    arrastando = { secaoEl, startY: e.clientY, startTop: rect.top, height: rect.height };
+    secaoEl.classList.add('arrastando');
+    secaoEl.style.position = 'relative';
+    secaoEl.style.zIndex = 60;
+    try{ handle.setPointerCapture(e.pointerId); }catch(err){}
+  });
+  handle.addEventListener('pointermove', (e) => {
+    if (!arrastando || arrastando.secaoEl !== secaoEl) return;
+    moverArraste(e);
+  });
+  handle.addEventListener('pointerup', () => {
+    if (!arrastando || arrastando.secaoEl !== secaoEl) return;
+    finalizarArraste();
+  });
+  handle.addEventListener('pointercancel', () => {
+    if (arrastando && arrastando.secaoEl === secaoEl) finalizarArraste();
+  });
+}
+function moverArraste(e){
+  if (!arrastando) return;
+  const dy = e.clientY - arrastando.startY;
+  arrastando.secaoEl.style.transform = `translateY(${dy}px)`;
+  const cont = document.getElementById('momentosContainer');
+  const centroArrastado = arrastando.startTop + arrastando.height/2 + dy;
+  const secoes = Array.from(cont.children);
+  for (const outra of secoes){
+    if (outra === arrastando.secaoEl) continue;
+    const r = outra.getBoundingClientRect();
+    if (centroArrastado > r.top && centroArrastado < r.bottom){
+      const centroOutra = r.top + r.height/2;
+      if (centroArrastado < centroOutra){
+        cont.insertBefore(arrastando.secaoEl, outra);
+      } else {
+        cont.insertBefore(arrastando.secaoEl, outra.nextSibling);
+      }
+      const novoRect = arrastando.secaoEl.getBoundingClientRect();
+      arrastando.startTop = novoRect.top - dy;
+      break;
+    }
+  }
+}
+function finalizarArraste(){
+  if (!arrastando) return;
+  arrastando.secaoEl.classList.remove('arrastando');
+  arrastando.secaoEl.style.transform = '';
+  arrastando.secaoEl.style.position = '';
+  arrastando.secaoEl.style.zIndex = '';
+  arrastando = null;
+  const cont = document.getElementById('momentosContainer');
+  const idsNaOrdem = Array.from(cont.children).map(el => el.dataset.id);
+  momentos.sort((a,b) => idsNaOrdem.indexOf(a.id) - idsNaOrdem.indexOf(b.id));
+  atualizarPreview();
+  salvarEstadoAdiado();
+}
+
+/* ---------- Ocultar / excluir definitivo / restaurar / adicionar momento ---------- */
+function ocultarMomento(id){
+  const valores = coletarValores();
+  const idx = momentos.findIndex(m => m.id === id);
+  if (idx === -1) return;
+  const m = momentos[idx];
+  m._indiceOriginal = idx;
+  momentos.splice(idx,1);
+  excluidos.push(m);
+  renderizarMomentos();
+  aplicarValores(valores);
+  aplicarEstadoTravamento();
+  salvarEstadoAdiado();
+}
+function restaurarMomento(id){
+  const valores = coletarValores();
+  const idx = excluidos.findIndex(m => m.id === id);
+  if (idx === -1) return;
+  const [restaurado] = excluidos.splice(idx,1);
+  const posicao = Math.max(0, Math.min(restaurado._indiceOriginal != null ? restaurado._indiceOriginal : momentos.length, momentos.length));
+  momentos.splice(posicao, 0, restaurado);
+  ordenarMomentosPorHorario();
+  renderizarMomentos();
+  aplicarValores(valores);
+  aplicarEstadoTravamento();
+  salvarEstadoAdiado();
+}
+function pedirExclusaoDefinitiva(id){
+  const sec = document.querySelector(`.section[data-id="${id}"]`);
+  if (!sec || sec.querySelector('.confirmar-exclusao-def')) return;
+  const m = momentos.find(mm => mm.id === id);
+  const box = document.createElement('div');
+  box.className = 'confirmar-exclusao-def confirmar-box';
+  box.innerHTML = `<p>Excluir "${esc(m ? m.titulo : '')}" definitivamente? Isso não pode ser desfeito.</p>
+    <div class="confirmar-acoes">
+      <button type="button" class="btn" style="background:var(--red);color:#fff;" onclick="excluirDefinitivamente('${id}')">Sim, excluir de vez</button>
+      <button type="button" class="btn btn-neutro" onclick="this.closest('.confirmar-exclusao-def').remove();">Cancelar</button>
+    </div>`;
+  sec.appendChild(box);
+}
+function excluirDefinitivamente(id){
+  const valores = coletarValores();
+  const idx = momentos.findIndex(m => m.id === id);
+  if (idx !== -1) momentos.splice(idx,1);
+  renderizarMomentos();
+  aplicarValores(valores);
+  aplicarEstadoTravamento();
+  salvarEstadoAdiado();
+  mostrarToast('Momento excluído definitivamente.');
+}
+function aoMarcarHoraNovo(){
+  const comHora = document.getElementById('novoMomentoHora').checked;
+  document.getElementById('linhaNovoHora').classList.toggle('hidden', !comHora);
+  document.getElementById('linhaNovoPosicao').classList.toggle('hidden', comHora);
+}
+function preencherOpcoesPosicao(){
+  const sel = document.getElementById('novoMomentoApos');
+  sel.innerHTML = '<option value="">No final do culto</option>' +
+    momentos.map(m => `<option value="${esc(m.id)}">${esc(m.titulo)}${m.temHora && lerHora(m) ? ' (' + esc(lerHora(m)) + ')' : ''}</option>`).join('');
+}
+function mostrarFormNovoMomento(){
+  preencherOpcoesPosicao();
+  aoMarcarHoraNovo();
+  document.getElementById('formNovoMomento').classList.remove('hidden');
+  document.getElementById('btnMostrarFormNovo').classList.add('hidden');
+}
+function cancelarNovoMomento(){
+  document.getElementById('formNovoMomento').classList.add('hidden');
+  document.getElementById('btnMostrarFormNovo').classList.remove('hidden');
+  document.getElementById('novoMomentoTitulo').value = '';
+  document.getElementById('novoMomentoHora').checked = true;
+  document.getElementById('novoMomentoHoraValor').value = '09:00';
+  document.getElementById('novoMomentoNome').checked = true;
+  document.getElementById('novoMomentoMidia').checked = false;
+}
+function confirmarNovoMomento(){
+  const titulo = document.getElementById('novoMomentoTitulo').value.trim();
+  if (!titulo){ mostrarToast('Digite um nome para o momento.'); return; }
+  const valores = coletarValores();
+  const temHora = document.getElementById('novoMomentoHora').checked;
+  const hora = temHora ? (document.getElementById('novoMomentoHoraValor').value || '09:00') : undefined;
+  const temNome = document.getElementById('novoMomentoNome').checked;
+  const temMidia = document.getElementById('novoMomentoMidia').checked;
+  const apos = document.getElementById('novoMomentoApos').value;
+  const novo = {id:'custom-' + Date.now(), titulo, icone:'⭐', tipo:'pessoas', temHora, hora, horaFixa:false, horaOculta:false, temNome, temMidia, min:1};
+  if (temHora){
+    momentos.push(novo);
+    ordenarMomentosPorHorario();
+  } else {
+    const idx = apos ? momentos.findIndex(x => x.id === apos) : -1;
+    if (idx >= 0) momentos.splice(idx+1, 0, novo); else momentos.push(novo);
+  }
+  renderizarMomentos();
+  aplicarValores(valores);
+  aplicarEstadoTravamento();
+  cancelarNovoMomento();
+  salvarEstadoAdiado();
+  mostrarToast('Momento adicionado!');
+}
+
+/* ---------- Sugestões de nomes ---------- */
+function mostrarSugestoes(input, tipo){
+  const mapa = tipo === 'musicas' ? freqMusicas : freqPessoas;
+  const termo = input.value.trim().toLowerCase();
+  const nomes = Object.keys(mapa).filter(n => n.toLowerCase().includes(termo)).sort((a,b)=>mapa[b]-mapa[a]).slice(0,6);
+  const popup = document.getElementById('sugestoesPopup');
+  if (nomes.length === 0){ popup.classList.add('hidden'); return; }
+  popup.innerHTML = nomes.map(n => `<button type="button" class="sugestao-chip" data-nome="${esc(n)}" onclick="selecionarSugestao(this.dataset.nome)">${esc(n)}</button>`).join('');
+  const rect = input.getBoundingClientRect();
+  popup.style.top = (window.scrollY + rect.bottom + 4) + 'px';
+  popup.style.left = (window.scrollX + rect.left) + 'px';
+  popup.classList.remove('hidden');
+  sugestaoAtiva = input;
+}
+function selecionarSugestao(nome){
+  if (sugestaoAtiva){
+    sugestaoAtiva.value = nome;
+    if (sugestaoAtiva.dataset.autodest){
+      if (sugestaoAtiva.value !== (sugestaoAtiva.dataset.auto || '')) sugestaoAtiva.dataset.manual = '1';
+    }
+    const tipo = sugestaoAtiva.getAttribute('onfocus') && sugestaoAtiva.getAttribute('onfocus').includes('musicas') ? 'musicas' : 'pessoas';
+    atualizarFrequencia(sugestaoAtiva, tipo);
+    atualizarPreview();
+    salvarEstadoAdiado();
+    document.getElementById('sugestoesPopup').classList.add('hidden');
+  }
+}
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.name-input') && !e.target.closest('#sugestoesPopup')){
+    document.getElementById('sugestoesPopup').classList.add('hidden');
+  }
+});
+function atualizarFrequencia(input, tipo){
+  const nome = input.value.trim();
+  if (!nome) return;
+  const mapa = tipo === 'musicas' ? freqMusicas : freqPessoas;
+  mapa[nome] = (mapa[nome] || 0) + 1;
+}
+
+/* ---------- Travar / destravar ---------- */
+function alternarTravamento(){
+  travado = !travado;
+  aplicarEstadoTravamento();
+  atualizarPreview();
+  salvarEstadoAdiado();
+}
+function aplicarEstadoTravamento(){
+  document.querySelectorAll('#momentosContainer input, #momentosContainer textarea, #inputData, #inputObservacoes').forEach(el => el.disabled = travado);
+  document.querySelectorAll('.add-btn, .remove-btn, .excluir-btn, .ocultar-btn, .drag-handle, .relogio-btn').forEach(el => el.style.display = travado ? 'none' : '');
+  momentos.forEach(m => { if (m.temHora) atualizarBotoesRelogio(m); });
+  const addMomentoCard = document.querySelector('.add-momento-card');
+  if (addMomentoCard) addMomentoCard.style.display = travado ? 'none' : '';
+  const ordenarCard = document.querySelector('.ordenar-card');
+  if (ordenarCard) ordenarCard.style.display = travado ? 'none' : '';
+  document.getElementById('btnLimpar').disabled = travado;
+  document.getElementById('modoSabado').disabled = travado;
+  document.getElementById('modoDomingo').disabled = travado;
+  document.getElementById('btnLock').innerHTML = travado ? '🔓 Destravar para editar' : '🔒 Travar tela';
+  document.getElementById('statusText').textContent = travado ? '🔒 Travado — pronto para compartilhar' : '✏️ Preenchendo o cronograma';
+  document.getElementById('topbar').classList.toggle('travado', travado);
+  document.getElementById('btnVer').classList.toggle('hidden', !travado);
+  renderizarExcluidos();
+  document.querySelectorAll('[id^="somentevideo-"]').forEach(chk => {
+    if (chk.checked) alternarSomenteVideo(chk.id.replace('somentevideo-',''));
+  });
+  if (!travado) fecharConferir();
+}
+
+/* ---------- Textos de cada momento ---------- */
+function textoSecao(valores){
+  const preenchidos = (valores||[]).filter(v => v && v.trim() !== '');
+  if (preenchidos.length === 0) return travado ? 'Não haverá' : '—';
+  return preenchidos.join(', ');
+}
+function valoresDe(container){
+  return container ? Array.from(container.querySelectorAll('.name-input')).map(i => i.value) : [];
+}
+function linhasDiaconos(){
+  const el = document.getElementById('diaconoAbrir');
+  if (!el) return {titulo: travado ? 'Não haverá' : '—', subs: []};
+  const subs = [];
+  const abrir = document.getElementById('diaconoAbrir').value.trim();
+  const fechar = document.getElementById('diaconoFechar').value.trim();
+  const corredor = document.getElementById('diaconoCorredor').value.trim();
+  if (abrir) subs.push('Abrir a igreja: ' + abrir);
+  if (fechar) subs.push('Fechar a igreja: ' + fechar);
+  if (corredor) subs.push('Corredor/Elevador: ' + corredor);
+  document.querySelectorAll('#camposDiaconosExtra .subrole-extra').forEach(row => {
+    const label = row.querySelector('.label-input').value.trim();
+    const valor = row.querySelector('.name-input').value.trim();
+    if (valor) subs.push((label||'Outros') + ': ' + valor);
+  });
+  if (subs.length === 0) return {titulo: travado ? 'Não haverá' : '—', subs: []};
+  return {titulo:'', subs};
+}
+function linhasSomMidia(){
+  const mesaEl = document.getElementById('inputSomMesa');
+  if (!mesaEl) return {titulo: travado ? 'Não haverá' : '—', subs: []};
+  const mesa = mesaEl.value.trim();
+  const telao = document.getElementById('inputSomTelao').value.trim();
+  if (!mesa && !telao) return {titulo: travado ? 'Não haverá' : '—', subs: []};
+  const subs = [];
+  if (mesa) subs.push('Mesa: ' + mesa);
+  if (telao) subs.push('Telão: ' + telao);
+  return {titulo:'', subs};
+}
+function linhasLouvor(){
+  const container = document.getElementById('camposLouvor');
+  if (!container) return {titulo: travado ? 'Não haverá' : '—', subs: []};
+  const titulo = textoSecao(valoresDe(container));
+  const subs = [];
+  const ministro = nomePapelLouvor('ministro');
+  const oracao = nomePapelLouvor('oracao');
+  if (ministro) subs.push('Ministro de louvor: ' + ministro);
+  if (oracao) subs.push('Oração: ' + oracao);
+  return {titulo, subs};
+}
+function linhasEstruturado(m){
+  let titulo = '';
+  if (m.min) titulo = textoSecao(valoresDe(document.getElementById('campos-'+m.id)));
+  const subs = [];
+  (m.subgrupos||[]).forEach(sg => {
+    if (sg.tipo === 'marcador'){ subs.push(sg.label); return; }
+    subs.push(`${sg.label}: ${textoSecao(valoresDe(document.getElementById(`sg-${m.id}-${sg.id}`)))}`);
+  });
+  if (m.temMidia){
+    const chk = document.getElementById('midia-'+m.id);
+    if (chk && chk.checked) subs.push('(com mídia no telão)');
+  }
+  return {titulo, subs};
+}
+function linhasMomento(m){
+  if (m.tipo === 'diaconos') return linhasDiaconos();
+  if (m.tipo === 'sommidia') return linhasSomMidia();
+  if (m.tipo === 'louvor') return linhasLouvor();
+  if (m.tipo === 'estruturado') return linhasEstruturado(m);
+  if (m.temSomenteVideo){
+    const chkVideo = document.getElementById('somentevideo-'+m.id);
+    if (chkVideo && chkVideo.checked) return {titulo: '🎬 Somente vídeo (sem fala)', subs: []};
+  }
+  if (m.temNome === false){
+    let titulo = '';
+    if (m.temMidia){
+      const chk = document.getElementById('midia-'+m.id);
+      if (chk && chk.checked) titulo = 'Com mídia no telão';
+    }
+    return {titulo, subs: []};
+  }
+  const container = document.getElementById('campos-'+m.id);
+  if (!container) return {titulo: travado ? 'Não haverá' : '—', subs: []};
+  let titulo = textoSecao(valoresDe(container));
+  if (m.temMidia){
+    const chk = document.getElementById('midia-'+m.id);
+    if (chk && chk.checked && titulo !== 'Não haverá') titulo += ' (com mídia no telão)';
+  }
+  return {titulo, subs: []};
+}
+
+/* ---------- Prévia e texto de compartilhamento ---------- */
+function atualizarDiaSemana(){
+  const {diaSemana} = diaEDataFormatada(document.getElementById('inputData').value);
+  document.getElementById('weekdayLabel').textContent = diaSemana;
+}
+function atualizarPreview(){
+  sincronizarAutoPreenchimento();
+  atualizarDiaSemana();
+  const {diaSemana, dataFormatada} = diaEDataFormatada(document.getElementById('inputData').value);
+  const obs = document.getElementById('inputObservacoes').value.trim();
+  const itens = momentos.map(m => {
+    const hora = textoHora(m);
+    const {titulo, subs} = linhasMomento(m);
+    const tituloTexto = titulo ? (': ' + esc(titulo)) : '';
+    const subsHtml = subs.length ? `<div class="preview-item-subs">${subs.map(s => `<div class="preview-item-sub">${esc(s)}</div>`).join('')}</div>` : '';
+    return `<div class="preview-item"><div class="preview-item-title${m.destaque ? ' destaque' : ''}">${m.icone} <b>${esc(hora)}</b>${esc(m.titulo)}${tituloTexto}</div>${subsHtml}</div>`;
+  }).join('');
+  document.getElementById('previewCard').innerHTML = `
+    <div class="preview-title">Cronograma IASD Ouro Preto</div>
+    <div class="preview-date">${esc(diaSemana)} ${esc(dataFormatada)}</div>
+    <div class="preview-lista">${itens}</div>
+    ${obs ? `<div class="preview-obs">📝 ${esc(obs)}</div>` : ''}
+  `;
+  if (carregado) salvarEstadoAdiado();
+}
+function gerarTextoCompartilhamento(){
+  sincronizarAutoPreenchimento();
+  const {diaSemana, dataFormatada} = diaEDataFormatada(document.getElementById('inputData').value);
+  let t = `✝️ MINISTÉRIO DA EXCELÊNCIA — IASD OURO PRETO\n${diaSemana} ${dataFormatada}\n\n`;
+  momentos.forEach(m => {
+    const hora = textoHora(m);
+    const {titulo, subs} = linhasMomento(m);
+    t += `${m.icone} ${hora}${m.titulo}${titulo ? ': '+titulo : ''}\n`;
+    subs.forEach(s => { t += `   ${s}\n`; });
+  });
+  const obs = document.getElementById('inputObservacoes').value.trim();
+  if (obs) t += `\n📝 Observações: ${obs}\n`;
+  return t;
+}
+
+/* ---------- Conferir em tela cheia ---------- */
+function abrirConferir(){
+  document.getElementById('overlayPreviewCard').innerHTML = document.getElementById('previewCard').innerHTML;
+  atualizarLabelCompartilhar();
+  document.getElementById('overlayConferir').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+function fecharConferir(){
+  document.getElementById('overlayConferir').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+/* ---------- Copiar / compartilhar / baixar imagem ---------- */
+async function copiarTexto(){
+  const texto = gerarTextoCompartilhamento();
+  try{
+    await navigator.clipboard.writeText(texto);
+    mostrarToast('Texto copiado! Agora é só colar onde quiser.');
+  }catch(e){
+    mostrarToast('Não foi possível copiar automaticamente.');
+  }
+}
+function removerEmojiRecursivo(el){
+  const regexEmoji = /[\u2600-\u27BF\u2190-\u21FF\u2B00-\u2BFF\uFE0F]|[\uD83C][\uDF00-\uDFFF]|[\uD83D][\uDC00-\uDE4F]|[\uD83D][\uDE80-\uDEFF]|[\uD83E][\uDD00-\uDDFF]/g;
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  let node;
+  while (node = walker.nextNode()) nodes.push(node);
+  nodes.forEach(n => { n.textContent = n.textContent.replace(regexEmoji,'').replace(/[ \t]{2,}/g,' ').trim(); });
+}
+function suportaCompartilharArquivo(){
+  return !!(navigator.share && navigator.canShare);
+}
+function prepararCloneParaImagem(){
+  const original = document.getElementById('previewCard');
+  const clone = original.cloneNode(true);
+  removerEmojiRecursivo(clone);
+  clone.style.position = 'fixed';
+  clone.style.top = '-6000px';
+  clone.style.left = '0';
+  clone.style.width = original.offsetWidth + 'px';
+  clone.style.background = '#0a1230';
+  clone.style.animation = 'none';
+  clone.style.opacity = '1';
+  clone.style.transform = 'none';
+  document.body.appendChild(clone);
+  return clone;
+}
+function gerarCanvasImagem(){
+  const clone = prepararCloneParaImagem();
+  const remover = () => { if (clone.parentNode) document.body.removeChild(clone); };
+  const aguardarFontes = (document.fonts && document.fonts.ready) ? document.fonts.ready.catch(()=>{}) : Promise.resolve();
+  return aguardarFontes.then(() => html2canvas(clone, {scale:2, backgroundColor:'#0a1230'})).then(canvas => { remover(); return canvas; }).catch(err => { remover(); throw err; });
+}
+function compartilharOuBaixarImagem(){
+  gerarCanvasImagem().then(canvas => {
+    canvas.toBlob(async (blob) => {
+      if (!blob){ mostrarToast('Não foi possível gerar a imagem.'); return; }
+      const arquivo = new File([blob], 'cronograma-iasd-ouro-preto.png', {type:'image/png'});
+      if (suportaCompartilharArquivo() && navigator.canShare({files:[arquivo]})){
+        try{
+          await navigator.share({files:[arquivo], title:'Cronograma IASD Ouro Preto'});
+        }catch(e){ /* a pessoa cancelou o compartilhamento, tudo bem */ }
+      } else {
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.download = 'cronograma-iasd-ouro-preto.png';
+        link.href = url;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 4000);
+        mostrarToast('Imagem baixada!');
+      }
+    }, 'image/png');
+  }).catch(() => mostrarToast('Não foi possível gerar a imagem agora.'));
+}
+function atualizarLabelCompartilhar(){
+  const el = document.getElementById('btnCompartilharImagem');
+  if (!el) return;
+  el.innerHTML = suportaCompartilharArquivo() ? '📱 Compartilhar imagem no WhatsApp' : '📸 Baixar imagem';
+}
+function mostrarToast(msg){
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(window._toastTimeout);
+  window._toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+/* ---------- Limpar / restaurar modelo ---------- */
+function pedirConfirmacaoLimpar(){
+  document.getElementById('confirmarLimparBox').classList.remove('hidden');
+  document.getElementById('btnLimpar').classList.add('hidden');
+}
+function cancelarLimpar(){
+  document.getElementById('confirmarLimparBox').classList.add('hidden');
+  document.getElementById('btnLimpar').classList.remove('hidden');
+}
+function limparTudoConfirmado(){
+  leituraRemotaIncerta = false; // a pessoa escolheu limpar de propósito
+  coletarValores(); // garante que os horários atuais fiquem guardados
+  travado = false;
+  renderizarMomentos();
+  aplicarValores({data: proximaData(modo), observacoes:''});
+  aplicarEstadoTravamento();
+  cancelarLimpar();
+  salvarEstado();
+  mostrarToast('Nomes limpos! Momentos e horários foram mantidos.');
+}
+function restaurarModeloPadrao(){
+  leituraRemotaIncerta = false;
+  momentos = modeloPadrao(modo);
+  excluidos = [];
+  travado = false;
+  renderizarMomentos();
+  aplicarValores({data: proximaData(modo), observacoes:''});
+  aplicarEstadoTravamento();
+  cancelarLimpar();
+  salvarEstado();
+  mostrarToast('Modelo padrão restaurado.');
+}
+
+/* ---------- Coletar / aplicar valores ---------- */
+function coletarValores(){
+  const valores = {
+    data: document.getElementById('inputData').value,
+    observacoes: document.getElementById('inputObservacoes').value,
+    porMomento: {}, diaconos: null, som: null, louvor: []
+  };
+  momentos.forEach(m => {
+    if (m.temHora){
+      const el = document.getElementById('hora-'+m.id);
+      if (el) m.hora = el.value;
+    }
+    const entrada = {};
+    const c = document.getElementById('campos-'+m.id);
+    if (c) entrada.campos = valoresDe(c);
+    const chk = document.getElementById('midia-'+m.id);
+    if (chk) entrada.midia = chk.checked;
+    const cv = document.getElementById('somentevideo-'+m.id);
+    if (cv) entrada.somenteVideo = cv.checked;
+    if (m.subgrupos){
+      entrada.subgrupos = {};
+      m.subgrupos.forEach(sg => {
+        if (sg.tipo === 'marcador') return;
+        const sc = document.getElementById(`sg-${m.id}-${sg.id}`);
+        if (sc) entrada.subgrupos[sg.id] = valoresDe(sc);
+      });
+    }
+    if (Object.keys(entrada).length) valores.porMomento[m.id] = entrada;
+  });
+  if (document.getElementById('diaconoAbrir')){
+    valores.diaconos = {
+      abrir: document.getElementById('diaconoAbrir').value,
+      fechar: document.getElementById('diaconoFechar').value,
+      corredor: document.getElementById('diaconoCorredor').value,
+      extras: Array.from(document.querySelectorAll('#camposDiaconosExtra .subrole-extra')).map(row => ({
+        label: row.querySelector('.label-input').value, valor: row.querySelector('.name-input').value
+      }))
+    };
+  }
+  if (document.getElementById('inputSomMesa')){
+    valores.som = { mesa: document.getElementById('inputSomMesa').value, telao: document.getElementById('inputSomTelao').value };
+  }
+  const louvorContainer = document.getElementById('camposLouvor');
+  if (louvorContainer){
+    valores.louvor = Array.from(louvorContainer.querySelectorAll('.field-row')).map(row => ({
+      nome: row.querySelector('.name-input').value,
+      papeis: Array.from(row.querySelectorAll('.papel-btn.ativo')).map(b=>b.dataset.papel)
+    }));
+  }
+  return valores;
+}
+function preencherCampos(container, tipo, campos){
+  const placeholder = tipo==='musicas' ? 'Nome da música' : 'Nome da pessoa';
+  while (container.querySelectorAll('.name-input').length < campos.length){
+    criarLinhaCampo(container, tipo, placeholder, true, '');
+  }
+  container.querySelectorAll('.name-input').forEach((inp,i) => { inp.value = campos[i] || ''; });
+}
+function aplicarValores(valores){
+  valores = valores || {};
+  document.getElementById('inputData').value = valores.data || dataDeHoje();
+  document.getElementById('inputObservacoes').value = valores.observacoes || '';
+  momentos.forEach(m => {
+    const salvo = (valores.porMomento && valores.porMomento[m.id]) || {};
+    const c = document.getElementById('campos-'+m.id);
+    if (c) preencherCampos(c, m.tipo === 'musicas' ? 'musicas' : 'pessoas', salvo.campos || []);
+    const chk = document.getElementById('midia-'+m.id);
+    if (chk) chk.checked = !!salvo.midia;
+    const cv = document.getElementById('somentevideo-'+m.id);
+    if (cv){
+      cv.checked = !!salvo.somenteVideo;
+      if (cv.checked) alternarSomenteVideo(m.id);
+    }
+    (m.subgrupos || []).forEach(sg => {
+      if (sg.tipo === 'marcador') return;
+      const sc = document.getElementById(`sg-${m.id}-${sg.id}`);
+      if (sc) preencherCampos(sc, sg.tipo, (salvo.subgrupos && salvo.subgrupos[sg.id]) || []);
+    });
+  });
+  if (valores.diaconos && document.getElementById('diaconoAbrir')){
+    document.getElementById('diaconoAbrir').value = valores.diaconos.abrir || '';
+    document.getElementById('diaconoFechar').value = valores.diaconos.fechar || '';
+    document.getElementById('diaconoCorredor').value = valores.diaconos.corredor || '';
+    (valores.diaconos.extras||[]).forEach(ex => adicionarFuncaoDiacono(ex.label, ex.valor));
+  }
+  if (valores.som && document.getElementById('inputSomMesa')){
+    document.getElementById('inputSomMesa').value = valores.som.mesa || '';
+    document.getElementById('inputSomTelao').value = valores.som.telao || '';
+  }
+  const louvorContainer = document.getElementById('camposLouvor');
+  if (louvorContainer && valores.louvor && valores.louvor.length){
+    while (louvorContainer.querySelectorAll('.field-row').length < valores.louvor.length){
+      criarLinhaLouvor(louvorContainer, true, '', []);
+    }
+    louvorContainer.querySelectorAll('.field-row').forEach((row,i) => {
+      const dado = valores.louvor[i] || {nome:'', papeis:[]};
+      row.querySelector('.name-input').value = dado.nome || '';
+      row.querySelectorAll('.papel-btn').forEach(b => b.classList.toggle('ativo', (dado.papeis||[]).includes(b.dataset.papel)));
+    });
+  }
+  atualizarPreview();
+}
+
+/* ---------- Modos Sábado / Domingo ---------- */
+function estadoInicial(md){
+  return { momentos: modeloPadrao(md), excluidos: [], valores: {data: proximaData(md), observacoes: ''} };
+}
+function capturarEstadoAtual(){
+  const valores = coletarValores();
+  return JSON.parse(JSON.stringify({ momentos, excluidos, valores }));
+}
+function atualizarBotoesModo(){
+  ['sabado','domingo'].forEach(md => {
+    const b = document.getElementById(md === 'sabado' ? 'modoSabado' : 'modoDomingo');
+    b.classList.toggle('ativo', modo === md);
+    b.setAttribute('aria-pressed', modo === md ? 'true' : 'false');
+  });
+}
+function carregarEstadoDoModo(md){
+  let e = estados[md];
+  if (!e || !e.momentos || !e.momentos.length) e = estadoInicial(md);
+  momentos = e.momentos;
+  excluidos = e.excluidos || [];
+  const valores = e.valores || {};
+  valores.data = dataValida(valores.data, md);
+  renderizarMomentos();
+  aplicarValores(valores);
+  atualizarBotoesModo();
+  aplicarEstadoTravamento();
+}
+function trocarModo(novo){
+  if (novo === modo || travado) return;
+  estados[modo] = capturarEstadoAtual();
+  modo = novo;
+  carregarEstadoDoModo(modo);
+  salvarEstadoAdiado();
+  mostrarToast(novo === 'sabado' ? 'Culto de Sábado' : 'Culto de Domingo');
+}
+
+/* ---------- Armazenamento: salva sozinho e só limpa quando a pessoa pedir ---------- */
+const TEMPO_ESGOTADO = {tempoEsgotado:true};
+function comLimiteDeTempo(promessa, ms, valorSeDemorar){
+  return Promise.race([
+    promessa,
+    new Promise((resolve) => setTimeout(() => resolve(valorSeDemorar === undefined ? null : valorSeDemorar), ms))
+  ]);
+}
+function mostrarStatusSalvo(ok, motivo){
+  const el = document.getElementById('statusSalvo');
+  if (!el) return;
+  if (ok){
+    el.textContent = '💾 Salvo automaticamente';
+    el.classList.remove('erro');
+  } else if (motivo === 'leitura'){
+    el.textContent = '⚠️ Não consegui ler o que estava salvo, então não vou gravar por cima. Feche e abra o app de novo. Seus dados antigos não foram apagados.';
+    el.classList.add('erro');
+  } else {
+    el.textContent = '⚠️ Este navegador não está conseguindo salvar. O que você digitar será perdido ao fechar. Abra o arquivo direto no Chrome ou Safari.';
+    el.classList.add('erro');
+  }
+}
+function salvarEstadoAdiado(){
+  clearTimeout(salvarTimeout);
+  salvarTimeout = setTimeout(salvarEstado, 400);
+}
+/* Salva já, sem esperar (usado quando a pessoa fecha ou sai do app) */
+function salvarAgora(){
+  clearTimeout(salvarTimeout);
+  salvarEstado();
+}
+function salvarEstado(){
+  if (!carregado) return; // nunca grava antes de terminar de carregar, para não apagar o que já estava salvo
+  try{
+    estados[modo] = capturarEstadoAtual();
+    const texto = JSON.stringify({ modo, estados, freqPessoas, freqMusicas, salvoEm: Date.now() });
+    let gravouLocal = false;
+    try{ window.localStorage.setItem(CHAVE_ARMAZENAMENTO, texto); gravouLocal = true; }catch(e){ /* indisponível neste ambiente */ }
+    if (window.storage && typeof window.storage.set === 'function' && !leituraRemotaIncerta){
+      comLimiteDeTempo(window.storage.set(CHAVE_ARMAZENAMENTO, texto, false), 3000)
+        .then(r => { if (r) mostrarStatusSalvo(true); else if (!gravouLocal) mostrarStatusSalvo(false); })
+        .catch(() => { if (!gravouLocal) mostrarStatusSalvo(false); });
+      if (gravouLocal) mostrarStatusSalvo(true);
+    } else if (gravouLocal){
+      mostrarStatusSalvo(true);
+    } else {
+      mostrarStatusSalvo(false, leituraRemotaIncerta ? 'leitura' : '');
+    }
+  }catch(e){ console.error('Erro ao salvar:', e); }
+}
+async function lerArmazenado(chave){
+  let local = null, remoto = null;
+  try{
+    const t = window.localStorage.getItem(chave);
+    if (t) local = JSON.parse(t);
+  }catch(e){ /* indisponível neste ambiente */ }
+  try{
+    if (window.storage && typeof window.storage.get === 'function'){
+      const r = await comLimiteDeTempo(window.storage.get(chave, false), 2500, TEMPO_ESGOTADO);
+      if (r === TEMPO_ESGOTADO){ if (chave === CHAVE_ARMAZENAMENTO) leituraRemotaIncerta = true; }
+      else if (r && r.value) remoto = JSON.parse(r.value);
+    }
+  }catch(e){ /* ainda não existe dado salvo, ou o armazenamento não respondeu */ }
+  if (local && remoto) return (remoto.salvoEm || 0) > (local.salvoEm || 0) ? remoto : local;
+  return local || remoto;
+}
+async function carregarDados(){
+  const [dados, antigo] = await Promise.all([lerArmazenado(CHAVE_ARMAZENAMENTO), lerArmazenado(CHAVE_ANTIGA)]);
+  if (!dados && antigo){ freqPessoas = antigo.freqPessoas || {}; freqMusicas = antigo.freqMusicas || {}; }
+  try{
+    if (dados){
+      freqPessoas = dados.freqPessoas || {};
+      freqMusicas = dados.freqMusicas || {};
+      estados = dados.estados || {};
+      modo = dados.modo === 'domingo' ? 'domingo' : 'sabado';
+    } else {
+      estados = {};
+      modo = modoMaisProximo();
+    }
+    travado = false; // cada nova sessão começa destravada, para nunca esconder os botões de editar por engano
+    carregarEstadoDoModo(modo);
+    carregado = true;
+    salvarEstadoAdiado();
+  }catch(e){
+    if (window.onerror) window.onerror('Falha ao montar a tela: ' + (e && e.message ? e.message : e), '', 0, 0, e);
+  }
+}
+/* Salva ao sair, fechar ou trocar de app */
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') salvarAgora(); });
+window.addEventListener('pagehide', salvarAgora);
+window.addEventListener('beforeunload', salvarAgora);
+
+/* ---------- Início (funciona mesmo se DOMContentLoaded já tiver ocorrido) ---------- */
+function iniciarApp(){ carregarDados(); }
+if (document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', iniciarApp);
+} else {
+  iniciarApp();
+}
+</script>
+</body>
+</html>
